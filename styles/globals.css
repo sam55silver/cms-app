@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
-.primary-btn {
-  @apply rounded-md w-fit text-white px-5 py-2
+@layer components {
+  .primary-btn {
+    @apply rounded-md w-fit text-white px-5 py-2
+  }
+
+  .nav-btn {
+    @apply p-5 text-white hover:cursor-pointer active:bg-slate-800
+  }
 }
