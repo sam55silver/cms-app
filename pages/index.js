@@ -1,9 +1,10 @@
 import { useState } from 'react';
+import { addDoc } from 'firebase/firestore';
 import toast from 'react-hot-toast';
 
 const savedNotify = () => toast.success('Content Saved!');
 
-export default function Home() {
+export default function Home({ colRef }) {
   const [postTitle, setPostTitle] = useState('');
   const [tags, setTags] = useState('');
   const [desc, setDesc] = useState('');
@@ -11,7 +12,18 @@ export default function Home() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    savedNotify();
+
+    const newDoc = addDoc(colRef, { postTitle, tags, desc, content }).then(
+      (docRef) => {
+        console.log('ID: ' + docRef.id);
+      }
+    );
+
+    toast.promise(newDoc, {
+      loading: 'Saving...',
+      success: 'Saved data',
+      error: 'Error when saving',
+    });
   };
 
   return (
@@ -20,7 +32,7 @@ export default function Home() {
         <h1 className='text-2xl'>Create a new post</h1>
 
         <div>
-          <label for='postTitle'>Title</label> <br />
+          <label>Title</label> <br />
           <input
             type='text'
             id='postTitle'
@@ -32,7 +44,7 @@ export default function Home() {
         </div>
 
         <div>
-          <label for='tags'>Tags</label> <br />
+          <label>Tags</label> <br />
           <input
             type='text'
             id='tags'
@@ -45,7 +57,7 @@ export default function Home() {
         </div>
 
         <div>
-          <label for='desc'>Description</label> <br />
+          <label>Description</label> <br />
           <textarea
             type='text'
             id='desc'
@@ -57,7 +69,7 @@ export default function Home() {
         </div>
 
         <div>
-          <label for='content'>Content</label> <br />
+          <label>Content</label> <br />
           <textarea
             rows='30'
             type='text'
