@@ -1,3 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.primary-btn {
+  @apply rounded-md w-fit text-white px-5 py-2
+}
