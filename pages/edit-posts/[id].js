@@ -1,6 +1,7 @@
 import useSWR from 'swr';
 import { useRouter } from 'next/router';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, deleteDoc } from 'firebase/firestore';
+import toast from 'react-hot-toast';
 
 import ContentForm from '../../components/contentForm';
 
@@ -17,11 +18,38 @@ const Post = ({ colRef }) => {
 
   const { data, error } = useSWR({ colRef: colRef, docID: id }, fetcher);
 
+  // TO-DO: fix form from not reloading?
+
   if (error) return <div>Failed to load</div>;
-  if (!data) return <div>loading...</div>;
+  if (!data) {
+    console.log('on loading');
+    return <div>loading...</div>;
+  }
 
   const onSubmit = (formValues) => {
-    console.log(formValues);
+    console.log('data', data, 'formValues', formValues);
+
+    const savingDoc = setDoc(doc(colRef, id), formValues).then(() => {
+      router.push('/view-posts');
+    });
+
+    toast.promise(savingDoc, {
+      loading: 'Saving...',
+      success: 'Saved Draft',
+      error: 'Error when saving',
+    });
+  };
+
+  const deletePost = () => {
+    const deletingPost = deleteDoc(doc(colRef, id)).then(() => {
+      router.push('/view-posts');
+    });
+
+    toast.promise(deletingPost, {
+      loading: 'Deleting...',
+      success: 'Deleted Post',
+      error: 'Error when deleting',
+    });
   };
 
   const buttonJsx = (
@@ -30,7 +58,11 @@ const Post = ({ colRef }) => {
         Save Draft
       </button>
 
-      <button type='button' className='bg-red-500 primary-btn'>
+      <button
+        type='button'
+        onClick={deletePost}
+        className='bg-red-500 primary-btn'
+      >
         Delete
       </button>
     </div>
@@ -41,7 +73,7 @@ const Post = ({ colRef }) => {
       header='Edit post'
       buttonJsx={buttonJsx}
       onSubmit={onSubmit}
-      postData={data}
+      postData={postData}
     />
   );
 };

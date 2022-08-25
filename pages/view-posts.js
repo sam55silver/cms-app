@@ -28,7 +28,7 @@ const ViewPosts = ({ colRef }) => {
           <div key={post.id}>
             <Link href={`/edit-posts/${post.id}`}>
               <div className='bg-slate-400 rounded-md p-5 hover:cursor-pointer'>
-                <span>{post.postTitle}</span>
+                <span>{post.title}</span>
                 <p>{post.desc}</p>
                 <div className='flex gap-2'>
                   {post.tags.split(',').map((tag, index) => (

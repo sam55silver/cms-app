@@ -22,7 +22,7 @@ const CreateNewPost = ({ colRef }) => {
   const buttonJsx = (
     <div className='flex justify-between'>
       <button type='submit' className='bg-blue-500 primary-btn'>
-        Save Draft
+        Create Draft
       </button>
 
       <Link href='/'>
