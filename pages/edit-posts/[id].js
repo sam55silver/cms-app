@@ -73,7 +73,7 @@ const Post = ({ colRef }) => {
       header='Edit post'
       buttonJsx={buttonJsx}
       onSubmit={onSubmit}
-      postData={postData}
+      postData={data}
     />
   );
 };
