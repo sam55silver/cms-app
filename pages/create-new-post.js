@@ -1,12 +1,22 @@
-import { useState } from 'react';
 import { addDoc } from 'firebase/firestore';
-
+import toast from 'react-hot-toast';
 import ContentForm from '../components/contentForm';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 
-const CreateNewPost = () => {
+const CreateNewPost = ({ colRef }) => {
+  const router = useRouter();
+
   const onSubmit = (formValues) => {
-    console.log(formValues);
+    const newDoc = addDoc(colRef, formValues).then((docRef) => {
+      router.push('/view-posts');
+    });
+
+    toast.promise(newDoc, {
+      loading: 'Saving...',
+      success: 'Saved Draft',
+      error: 'Error when saving',
+    });
   };
 
   const buttonJsx = (
@@ -33,43 +43,3 @@ const CreateNewPost = () => {
 };
 
 export default CreateNewPost;
-
-// export default function Home({ colRef }) {
-//   const [postTitle, setPostTitle] = useState('');
-//   const [tags, setTags] = useState('');
-//   const [desc, setDesc] = useState('');
-//   const [content, setContent] = useState('');
-
-//   const handleSubmit = (event) => {
-//     event.preventDefault();
-
-//     const newDoc = addDoc(colRef, { postTitle, tags, desc, content }).then(
-//       (docRef) => {
-//         console.log('ID: ' + docRef.id);
-//       }
-//     );
-
-//     toast.promise(newDoc, {
-//       loading: 'Saving...',
-//       success: 'Saved data',
-//       error: 'Error when saving',
-//     });
-//   };
-
-//   return (
-//     <div className='flex justify-between'>
-//       <button type='submit' className='bg-blue-500 primary-btn'>
-//         Save Changes
-//       </button>
-
-//       <div className='flex gap-2'>
-//         <button type='button' className='bg-green-500 primary-btn'>
-//           Publish
-//         </button>
-//         <button type='button' className='bg-red-500 primary-btn'>
-//           Delete
-//         </button>
-//       </div>
-//     </div>
-//   );
-// }

@@ -10,7 +10,7 @@ const ContentForm = (props) => {
     if (props.postData) {
       const data = props.postData;
 
-      setTitle(data.postTitle);
+      setTitle(data.title);
       setTags(data.tags);
       setDesc(data.desc);
       setContent(data.content);
