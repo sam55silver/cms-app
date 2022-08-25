@@ -26,7 +26,7 @@ const ViewPosts = ({ colRef }) => {
       <div className='flex gap-5 flex-wrap'>
         {data.map((post) => (
           <div key={post.id}>
-            <Link href={`/edit-post/${post.id}`}>
+            <Link href={`/edit-posts/${post.id}`}>
               <div className='bg-slate-400 rounded-md p-5 hover:cursor-pointer'>
                 <span>{post.postTitle}</span>
                 <p>{post.desc}</p>
