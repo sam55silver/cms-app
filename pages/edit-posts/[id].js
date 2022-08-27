@@ -1,34 +1,42 @@
-import useSWR from 'swr';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { doc, getDoc, setDoc, deleteDoc } from 'firebase/firestore';
 import toast from 'react-hot-toast';
 
 import ContentForm from '../../components/contentForm';
 
-const fetcher = async ({ colRef, docID }) => {
-  const docRef = doc(colRef, docID);
-  const docSnap = await getDoc(docRef);
-
-  return docSnap.data();
-};
-
 const Post = ({ colRef }) => {
   const router = useRouter();
   const id = router.query.id;
 
-  const { data, error } = useSWR({ colRef: colRef, docID: id }, fetcher);
+  const [data, setData] = useState(null);
 
-  // TO-DO: fix form from not reloading?
+  useEffect(() => {
+    console.log('fetching data. ID:', id);
 
-  if (error) return <div>Failed to load</div>;
+    if (id) {
+      const fetchData = async () => {
+        const docSnap = await getDoc(doc(colRef, id));
+        return docSnap;
+      };
+
+      fetchData().then((docSnap) => {
+        if (docSnap.exists()) {
+          setData(docSnap.data());
+        } else {
+          setData({ error: 'Document DNE' });
+        }
+      });
+    }
+  }, [id]);
+
   if (!data) {
-    console.log('on loading');
     return <div>loading...</div>;
+  } else if (data.error) {
+    return <div>{data.error}</div>;
   }
 
   const onSubmit = (formValues) => {
-    console.log('data', data, 'formValues', formValues);
-
     const savingDoc = setDoc(doc(colRef, id), formValues).then(() => {
       router.push('/view-posts');
     });
