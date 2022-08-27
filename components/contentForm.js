@@ -4,7 +4,7 @@ const ContentForm = (props) => {
   const [title, setTitle] = useState('');
   const [tags, setTags] = useState('');
   const [desc, setDesc] = useState('');
-  const [content, setContent] = useState('');
+  const [content, setContent] = useState([]);
 
   useEffect(() => {
     if (props.postData) {
@@ -13,7 +13,7 @@ const ContentForm = (props) => {
       setTitle(data.title);
       setTags(data.tags);
       setDesc(data.desc);
-      setContent(data.content);
+      // setContent(data.content);
     }
   }, []);
 
@@ -28,6 +28,29 @@ const ContentForm = (props) => {
     };
 
     props.onSubmit(formValues);
+  };
+
+  const uploadHandler = (event) => {
+    const files = Array.from(event.target.files);
+
+    setContent([...content, ...files]);
+
+    // const reader = new FileReader();
+    // reader.onload = (e) => {
+    //   const { result } = e.target;
+    //   console.log(result);
+    // };
+
+    // for (let i = 0; i < files.length; i++) {
+    //   const file = files[i];
+    //   console.log(file);
+
+    //   if (file.type.includes('text')) {
+    //     reader.readAsText(file);
+    //   } else if (file.type.includes('image')) {
+    //     reader.readAsDataURL(file);
+    //   }
+    // }
   };
 
   return (
@@ -74,15 +97,22 @@ const ContentForm = (props) => {
 
         <div>
           <label>Content</label> <br />
-          <textarea
-            rows='30'
-            type='text'
+          <input
+            type='file'
             id='content'
             name='content'
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            className='border border-slate-500 rounded-md p-2 w-full'
+            accept='image/png, image/jpeg, text/markdown'
+            multiple
+            onChange={uploadHandler}
           />
+        </div>
+
+        <div>
+          {content && content.length != 0 ? (
+            content.map((file, index) => <div key={index}>{file.name}</div>)
+          ) : (
+            <p>no files</p>
+          )}
         </div>
 
         {props.buttonJsx}
