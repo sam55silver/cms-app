@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
+import { marked } from 'marked';
+import parse from 'html-react-parser';
 
 const ContentForm = (props) => {
   const [title, setTitle] = useState('');
   const [tags, setTags] = useState('');
   const [desc, setDesc] = useState('');
-  const [content, setContent] = useState([]);
+  const [uploadedFiles, setUploadedFiles] = useState([]);
 
   useEffect(() => {
     if (props.postData) {
@@ -24,7 +26,7 @@ const ContentForm = (props) => {
       title: title,
       tags: tags,
       desc: desc,
-      content: content,
+      // content: content,
     };
 
     props.onSubmit(formValues);
@@ -32,31 +34,75 @@ const ContentForm = (props) => {
 
   const uploadHandler = (event) => {
     const files = Array.from(event.target.files);
+    setUploadedFiles([...uploadedFiles, ...files]);
+  };
 
-    setContent([...content, ...files]);
+  const deleteFile = (event) => {
+    const fileIndex = event.target.getAttribute('id');
 
-    // const reader = new FileReader();
-    // reader.onload = (e) => {
-    //   const { result } = e.target;
-    //   console.log(result);
-    // };
+    let newUploadedFiles = uploadedFiles;
+    newUploadedFiles.splice(fileIndex, 1);
 
-    // for (let i = 0; i < files.length; i++) {
-    //   const file = files[i];
-    //   console.log(file);
+    setUploadedFiles([...newUploadedFiles]);
+  };
 
-    //   if (file.type.includes('text')) {
-    //     reader.readAsText(file);
-    //   } else if (file.type.includes('image')) {
-    //     reader.readAsDataURL(file);
-    //   }
-    // }
+  const readFiles = () => {
+    const reader = new FileReader();
+
+    let fileHeaders = [];
+    let markdownPages = [];
+
+    uploadedFiles.forEach((file, index) => {
+      // Create file headers
+      const header = (
+        <div
+          key={index}
+          className='border-2 border-red-400 rounded-md p-2 w-1/2 flex justify-between items-center'
+        >
+          <span>{file.name}</span>
+          <button
+            id={index}
+            type='button'
+            onClick={deleteFile}
+            className='primary-btn bg-red-500'
+          >
+            Delete
+          </button>
+        </div>
+      );
+
+      fileHeaders.push(header);
+
+      if (file.name.includes('.md')) {
+        console.log('Parsing', file);
+        reader.readAsText(file);
+
+        reader.onload = (e) => {
+          const { result } = e.target;
+          const html = marked.parse(result);
+
+          const page = <div>{parse(html)}</div>;
+          console.log(page);
+
+          markdownPages.push(page);
+        };
+      }
+    });
+
+    return (
+      <>
+        <div className='flex flex-col gap-4'>
+          {fileHeaders.map((header) => header)}
+        </div>
+        <div>{markdownPages.map((page) => page)}</div>
+      </>
+    );
   };
 
   return (
     <div className='container mx-auto p-5'>
       <form onSubmit={onSubmit} className='flex flex-col gap-5'>
-        <h1 className='text-2xl'>{props.header}</h1>
+        <h1 className='text-2xl font-bold'>{props.header}</h1>
 
         <div>
           <label>Title</label> <br />
@@ -101,19 +147,13 @@ const ContentForm = (props) => {
             type='file'
             id='content'
             name='content'
-            accept='image/png, image/jpeg, text/markdown'
+            accept='image/png, image/jpeg, text/markdown,.md,.png,.jpeg'
             multiple
             onChange={uploadHandler}
           />
         </div>
 
-        <div>
-          {content && content.length != 0 ? (
-            content.map((file, index) => <div key={index}>{file.name}</div>)
-          ) : (
-            <p>no files</p>
-          )}
-        </div>
+        {uploadedFiles.length != 0 ? readFiles() : <span>No Files</span>}
 
         {props.buttonJsx}
       </form>
