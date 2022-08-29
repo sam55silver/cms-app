@@ -72,6 +72,7 @@ const ContentForm = (props) => {
   const readFiles = () => {
     let fileHeaders = [];
     let content = [];
+    let renderedImages = [];
 
     uploadedFiles.forEach((file, index) => {
       // Create file headers
@@ -93,15 +94,32 @@ const ContentForm = (props) => {
       );
 
       if (file.type == 'text') {
-        const page = (
-          <div
-            dangerouslySetInnerHTML={{ __html: marked.parse(file.content) }}
-          />
-        );
-        content.push(page);
+        let page = parse(marked.parse(file.content));
+
+        page.map((elem, index) => {
+          if (elem.type == 'p' && elem.props.children.type == 'img') {
+            const imgFileName = elem.props.children.props.src;
+
+            let imgSrc = null;
+
+            uploadedFiles.forEach((obj) => {
+              if (obj.name == imgFileName) {
+                renderedImages.push(obj.name);
+                imgSrc = obj.content;
+              }
+            });
+
+            if (imgSrc) {
+              page[index] = <img src={imgSrc} />;
+            }
+          }
+        });
+
+        content.push({ elem: page });
       } else {
         const image = <Image src={file.content} width={50} height={50} />;
-        content.push(image);
+        const imageObj = { name: file.name, elem: image };
+        content.push(imageObj);
       }
 
       fileHeaders.push(header);
@@ -112,10 +130,13 @@ const ContentForm = (props) => {
         <div className='flex flex-col gap-4'>
           {fileHeaders.map((header) => header)}
         </div>
+        <h2 className='text-xl font-bold'>Preview</h2>
         <div>
-          {content.map((page, index) => (
-            <div key={index}>{page}</div>
-          ))}
+          {content.map((page, index) => {
+            if (!renderedImages.includes(page.name)) {
+              return <div key={index}>{page.elem}</div>;
+            }
+          })}
         </div>
       </>
     );
