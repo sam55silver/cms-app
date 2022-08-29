@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { marked } from 'marked';
 import parse from 'html-react-parser';
+import Image from 'next/image';
 
 const ContentForm = (props) => {
   const [title, setTitle] = useState('');
@@ -32,9 +33,31 @@ const ContentForm = (props) => {
     props.onSubmit(formValues);
   };
 
-  const uploadHandler = (event) => {
-    const files = Array.from(event.target.files);
-    setUploadedFiles([...uploadedFiles, ...files]);
+  const uploadHandler = async (event) => {
+    const files = Array.from(event.target.files).map((file) => {
+      const reader = new FileReader();
+      return new Promise((resolve) => {
+        let type;
+
+        reader.onload = () =>
+          resolve({
+            name: file.name,
+            type: type,
+            file: file,
+            content: reader.result,
+          });
+
+        if (file.name.includes('.md')) {
+          type = 'text';
+          reader.readAsText(file);
+        } else if (file.type.includes('image')) {
+          type = 'image';
+          reader.readAsDataURL(file);
+        }
+      });
+    });
+    const res = await Promise.all(files);
+    setUploadedFiles([...uploadedFiles, ...res]);
   };
 
   const deleteFile = (event) => {
@@ -47,10 +70,8 @@ const ContentForm = (props) => {
   };
 
   const readFiles = () => {
-    const reader = new FileReader();
-
     let fileHeaders = [];
-    let markdownPages = [];
+    let content = [];
 
     uploadedFiles.forEach((file, index) => {
       // Create file headers
@@ -71,22 +92,19 @@ const ContentForm = (props) => {
         </div>
       );
 
-      fileHeaders.push(header);
-
-      if (file.name.includes('.md')) {
-        console.log('Parsing', file);
-        reader.readAsText(file);
-
-        reader.onload = (e) => {
-          const { result } = e.target;
-          const html = marked.parse(result);
-
-          const page = <div>{parse(html)}</div>;
-          console.log(page);
-
-          markdownPages.push(page);
-        };
+      if (file.type == 'text') {
+        const page = (
+          <div
+            dangerouslySetInnerHTML={{ __html: marked.parse(file.content) }}
+          />
+        );
+        content.push(page);
+      } else {
+        const image = <Image src={file.content} width={50} height={50} />;
+        content.push(image);
       }
+
+      fileHeaders.push(header);
     });
 
     return (
@@ -94,7 +112,11 @@ const ContentForm = (props) => {
         <div className='flex flex-col gap-4'>
           {fileHeaders.map((header) => header)}
         </div>
-        <div>{markdownPages.map((page) => page)}</div>
+        <div>
+          {content.map((page, index) => (
+            <div key={index}>{page}</div>
+          ))}
+        </div>
       </>
     );
   };
