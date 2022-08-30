@@ -3,6 +3,7 @@ import { Toaster } from 'react-hot-toast';
 import Navigation from '../components/navigation';
 
 import { getFirestore, collection } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
 
 import { initializeApp } from 'firebase/app';
 
@@ -18,6 +19,7 @@ const firebaseConfig = {
 initializeApp(firebaseConfig);
 
 const db = getFirestore();
+const fbStorage = getStorage();
 const colRef = collection(db, 'posts');
 
 function MyApp({ Component, pageProps }) {
@@ -26,7 +28,7 @@ function MyApp({ Component, pageProps }) {
       <Toaster />
       <div className='flex h-full'>
         <Navigation />
-        <Component colRef={colRef} {...pageProps} />
+        <Component colRef={colRef} fbStorage={fbStorage} {...pageProps} />
       </div>
     </>
   );

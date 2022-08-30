@@ -16,7 +16,7 @@ const ContentForm = (props) => {
       setTitle(data.title);
       setTags(data.tags);
       setDesc(data.desc);
-      // setContent(data.content);
+      // setUploadedFiles(data.content);
     }
   }, []);
 
@@ -27,7 +27,7 @@ const ContentForm = (props) => {
       title: title,
       tags: tags,
       desc: desc,
-      // content: content,
+      content: uploadedFiles,
     };
 
     props.onSubmit(formValues);
@@ -35,6 +35,7 @@ const ContentForm = (props) => {
 
   const uploadHandler = async (event) => {
     const files = Array.from(event.target.files).map((file) => {
+      console.log('file', typeof file);
       const reader = new FileReader();
       return new Promise((resolve) => {
         let type;

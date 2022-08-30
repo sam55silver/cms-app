@@ -1,15 +1,30 @@
 import { addDoc } from 'firebase/firestore';
+import { ref, uploadBytes } from 'firebase/storage';
 import toast from 'react-hot-toast';
 import ContentForm from '../components/contentForm';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 
-const CreateNewPost = ({ colRef }) => {
+const CreateNewPost = ({ colRef, fbStorage }) => {
   const router = useRouter();
 
   const onSubmit = (formValues) => {
-    const newDoc = addDoc(colRef, formValues).then((docRef) => {
-      router.push('/view-posts');
+    const { title, tags, desc } = formValues;
+
+    const newDoc = addDoc(colRef, {
+      title: title,
+      tags: tags,
+      desc: desc,
+    }).then((docRef) => {
+      formValues.content.map((file) => {
+        const path = `${docRef.id}/${file.name}`;
+        const storageRef = ref(fbStorage, path);
+
+        uploadBytes(storageRef, file.file).then((snapshot) => {
+          console.log('Uploaded file!', snapshot);
+          router.push('/view-posts');
+        });
+      });
     });
 
     toast.promise(newDoc, {
