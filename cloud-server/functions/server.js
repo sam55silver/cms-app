@@ -5,6 +5,8 @@ admin.initializeApp();
 
 // GraphQL Express server init
 const express = require('express');
+const cors = require('cors');
+
 const { graphqlHTTP } = require('express-graphql');
 const { buildSchema } = require('graphql');
 
@@ -21,6 +23,8 @@ const root = {
     return 'Hello World!';
   },
 };
+
+app.use(cors({ origin: true }));
 
 app.use(
   '/graphql',
