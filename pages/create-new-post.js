@@ -4,30 +4,27 @@ import toast from 'react-hot-toast';
 import ContentForm from '../components/contentForm';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import axios from 'axios';
 
 const CreateNewPost = ({ colRef, fbStorage }) => {
   const router = useRouter();
 
-  const onSubmit = (formValues) => {
-    const { title, tags, desc } = formValues;
-
-    const newDoc = addDoc(colRef, {
-      title: title,
-      tags: tags,
-      desc: desc,
-    }).then((docRef) => {
-      formValues.content.map((file) => {
-        const path = `${docRef.id}/${file.name}`;
-        const storageRef = ref(fbStorage, path);
-
-        uploadBytes(storageRef, file.file).then((snapshot) => {
-          console.log('Uploaded file!', snapshot);
-          router.push('/view-posts');
-        });
-      });
+  const onSubmit = ({ title, tags, desc }) => {
+    const fetchData = axios({
+      url: 'http://localhost:5001/cms-app-1a47d/us-central1/app/graphql',
+      method: 'post',
+      headers: {
+        'content-type': 'application/json',
+      },
+      data: {
+        'query': 'query {helloWorld}',
+        'variables': {},
+      },
+    }).then(({ data }) => {
+      console.log(data);
     });
 
-    toast.promise(newDoc, {
+    toast.promise(fetchData, {
       loading: 'Saving...',
       success: 'Saved Draft',
       error: 'Error when saving',

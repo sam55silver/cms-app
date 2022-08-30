@@ -8,6 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "axios": "^0.27.2",
     "firebase": "^9.9.3",
     "html-react-parser": "^3.0.4",
     "marked": "^4.0.19",
