@@ -3,6 +3,8 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 admin.initializeApp();
 
+const db = admin.firestore().collection('posts');
+
 // GraphQL Express server init
 const express = require('express');
 const cors = require('cors');
@@ -12,15 +14,51 @@ const { buildSchema } = require('graphql');
 
 const app = express();
 
+// Construct a schema, using GraphQL schema language
 const schema = buildSchema(`
+  input PostInput {
+    title: String
+    tags: String
+    desc: String
+  }
+
+  type Post {
+    id: ID!
+    title: String
+    tags: String
+    desc: String
+  }
+
+  type Mutation {
+    createPost(input: PostInput): Post
+    updatePost(id: ID!, input: PostInput): Post
+  }
+
   type Query {
-    helloWorld: String!
+    getPost(id: ID!): Post
   }
 `);
 
+class Post {
+  constructor(id, { title, tags, desc }) {
+    this.id = id;
+    this.title = title;
+    this.tags = tags;
+    this.desc = desc;
+  }
+}
+
 const root = {
-  helloWorld: () => {
-    return 'Hello World!';
+  getPost: async ({ id }) => {
+    const docRef = db.doc(id);
+
+    const doc = await docRef.get();
+
+    if (doc.exists) {
+      return new Post(id, doc.data());
+    } else {
+      throw new Error('Post dne!');
+    }
   },
 };
 

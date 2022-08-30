@@ -10,17 +10,43 @@ const CreateNewPost = ({ colRef, fbStorage }) => {
   const router = useRouter();
 
   const onSubmit = ({ title, tags, desc }) => {
-    const fetchData = axios({
-      url: 'http://localhost:5001/cms-app-1a47d/us-central1/app/graphql',
-      method: 'post',
-      headers: {
-        'content-type': 'application/json',
-      },
-      data: {
-        'query': 'query {helloWorld}',
-        'variables': {},
-      },
-    }).then(({ data }) => {
+    const url = 'http://localhost:5001/cms-app-1a47d/us-central1/app/graphql';
+    const headers = {
+      'content-type': 'application/json',
+    };
+    const body = `
+    query Post($id: ID!) {
+      getPost(id: $id) {
+        title
+        tags
+        desc
+        id
+      }
+    }
+    `;
+
+    const fetchData = new Promise((res, rej) => {
+      axios({
+        url: url,
+        method: 'post',
+        headers: headers,
+        data: {
+          query: body,
+          variables: { id: 'CFc1ZUEGVztMZCTSjEPK' },
+        },
+      })
+        .then(({ data: { data, errors } }) => {
+          if (errors) {
+            rej(errors);
+          } else {
+            res(data);
+          }
+        })
+        .catch((err) => {
+          rej(err);
+          console.log(err);
+        });
+    }).then((data) => {
       console.log(data);
     });
 
