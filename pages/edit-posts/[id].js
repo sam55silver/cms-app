@@ -21,11 +21,18 @@ const UPDATE_POST = gql`
   }
 `;
 
+const DELETE_POST = gql`
+  mutation deletePost($id: ID!) {
+    deletePost(id: $id)
+  }
+`;
+
 const Post = () => {
   const router = useRouter();
   const { id } = router.query;
 
   const [updatePost, { updateData }] = useMutation(UPDATE_POST);
+  const [deletePost, { deletePostData }] = useMutation(DELETE_POST);
 
   const { error, data } = useQuery(GET_POST, {
     variables: { id: id },
@@ -49,15 +56,16 @@ const Post = () => {
     });
   };
 
-  const deletePost = () => {
-    // const deletingPost = deleteDoc(doc(colRef, id)).then(() => {
-    //   router.push('/view-posts');
-    // });
-    // toast.promise(deletingPost, {
-    //   loading: 'Deleting...',
-    //   success: 'Deleted Post',
-    //   error: 'Error when deleting',
-    // });
+  const deletePostBtn = () => {
+    const deletingPost = deletePost({ variables: { 'id': id } }).then(
+      router.push('/view-posts')
+    );
+
+    toast.promise(deletingPost, {
+      loading: 'Deleting...',
+      success: 'Deleted Post',
+      error: 'Error when deleting',
+    });
   };
 
   const buttonJsx = (
@@ -68,7 +76,7 @@ const Post = () => {
 
       <button
         type='button'
-        onClick={deletePost}
+        onClick={deletePostBtn}
         className='bg-red-500 primary-btn'
       >
         Delete

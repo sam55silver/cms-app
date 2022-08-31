@@ -32,6 +32,7 @@ const schema = buildSchema(`
   type Mutation {
     createPost(input: PostInput): Post
     updatePost(id: ID!, input: PostInput): Post
+    deletePost(id: ID!): String
   }
 
   type Query {
@@ -96,6 +97,15 @@ const root = {
       return new Post(id, input);
     } catch {
       throw new Error('Error updating document');
+    }
+  },
+
+  deletePost: async ({ id }) => {
+    try {
+      await db.doc(id).delete();
+      return 'Deleted document';
+    } catch {
+      throw new Error('Error deleting document');
     }
   },
 };
