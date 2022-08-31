@@ -89,6 +89,15 @@ const root = {
       throw new Error('Error adding document');
     }
   },
+
+  updatePost: async ({ id, input }) => {
+    try {
+      await db.doc(id).set(input);
+      return new Post(id, input);
+    } catch {
+      throw new Error('Error updating document');
+    }
+  },
 };
 
 app.use(cors({ origin: true }));

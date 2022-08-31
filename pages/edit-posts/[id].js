@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router';
 import toast from 'react-hot-toast';
 import ContentForm from '../../components/contentForm';
-import { useQuery, gql } from '@apollo/client';
+import { useQuery, gql, useMutation } from '@apollo/client';
 
 const GET_POST = gql`
   query getPost($id: ID!) {
@@ -13,9 +13,19 @@ const GET_POST = gql`
   }
 `;
 
+const UPDATE_POST = gql`
+  mutation updatePost($id: ID!, $input: PostInput) {
+    updatePost(id: $id, input: $input) {
+      id
+    }
+  }
+`;
+
 const Post = () => {
   const router = useRouter();
   const { id } = router.query;
+
+  const [updatePost, { updateData }] = useMutation(UPDATE_POST);
 
   const { error, data } = useQuery(GET_POST, {
     variables: { id: id },
@@ -26,14 +36,17 @@ const Post = () => {
   if (!data) return <div>Loading...</div>;
 
   const onSubmit = (formValues) => {
-    // const savingDoc = setDoc(doc(colRef, id), formValues).then(() => {
-    //   router.push('/view-posts');
-    // });
-    // toast.promise(savingDoc, {
-    //   loading: 'Saving...',
-    //   success: 'Saved Draft',
-    //   error: 'Error when saving',
-    // });
+    const savingDoc = updatePost({
+      variables: { 'id': id, 'input': formValues },
+    }).then(() => {
+      router.push('/view-posts');
+    });
+
+    toast.promise(savingDoc, {
+      loading: 'Saving...',
+      success: 'Saved Draft',
+      error: 'Error when saving',
+    });
   };
 
   const deletePost = () => {
