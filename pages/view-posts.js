@@ -1,22 +1,22 @@
 import Link from 'next/link';
-import FetchData from '../helper/fetchData';
-import useSWR from 'swr';
+import { useQuery, gql } from '@apollo/client';
 
-const body = `
-{
-  getPosts {
-    title
-    tags
-    desc
-    id
+const GET_POSTS = gql`
+  query getPosts {
+    getPosts {
+      title
+      tags
+      desc
+      id
+    }
   }
-}
 `;
 
 const ViewPosts = () => {
-  const { data, error } = useSWR(body, FetchData);
+  const { loading, error, data } = useQuery(GET_POSTS);
 
-  if (!data) return <div>Loading...</div>;
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error</div>;
 
   return (
     <div className='container mx-auto my-5'>

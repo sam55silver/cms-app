@@ -1,64 +1,50 @@
-import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { doc, setDoc, deleteDoc } from 'firebase/firestore';
 import toast from 'react-hot-toast';
-
 import ContentForm from '../../components/contentForm';
-import FetchData from '../../helper/fetchData';
+import { useQuery, gql } from '@apollo/client';
 
-const query = `
-query Post($id: ID!) {
-  getPost(id: $id) {
-    title
-    tags
-    desc
-    id
+const GET_POST = gql`
+  query getPost($id: ID!) {
+    getPost(id: $id) {
+      title
+      tags
+      desc
+    }
   }
-}
 `;
 
-const Post = ({ colRef }) => {
+const Post = () => {
   const router = useRouter();
-  const id = router.query.id;
+  const { id } = router.query;
 
-  const [data, setData] = useState(null);
+  const { error, data } = useQuery(GET_POST, {
+    variables: { id: id },
+    skip: !id,
+  });
 
-  useEffect(() => {
-    console.log('fetching data. ID:', id);
-
-    if (id) {
-      FetchData(query, { id: id }).then((data) => {
-        setData(data.getPost);
-      });
-    }
-  }, [router]);
-
-  if (!data) {
-    return <div>loading...</div>;
-  }
+  if (error) return <div>Error</div>;
+  if (!data) return <div>Loading...</div>;
 
   const onSubmit = (formValues) => {
-    const savingDoc = setDoc(doc(colRef, id), formValues).then(() => {
-      router.push('/view-posts');
-    });
-
-    toast.promise(savingDoc, {
-      loading: 'Saving...',
-      success: 'Saved Draft',
-      error: 'Error when saving',
-    });
+    // const savingDoc = setDoc(doc(colRef, id), formValues).then(() => {
+    //   router.push('/view-posts');
+    // });
+    // toast.promise(savingDoc, {
+    //   loading: 'Saving...',
+    //   success: 'Saved Draft',
+    //   error: 'Error when saving',
+    // });
   };
 
   const deletePost = () => {
-    const deletingPost = deleteDoc(doc(colRef, id)).then(() => {
-      router.push('/view-posts');
-    });
-
-    toast.promise(deletingPost, {
-      loading: 'Deleting...',
-      success: 'Deleted Post',
-      error: 'Error when deleting',
-    });
+    // const deletingPost = deleteDoc(doc(colRef, id)).then(() => {
+    //   router.push('/view-posts');
+    // });
+    // toast.promise(deletingPost, {
+    //   loading: 'Deleting...',
+    //   success: 'Deleted Post',
+    //   error: 'Error when deleting',
+    // });
   };
 
   const buttonJsx = (
@@ -82,7 +68,7 @@ const Post = ({ colRef }) => {
       header='Edit post'
       buttonJsx={buttonJsx}
       onSubmit={onSubmit}
-      postData={data}
+      postData={data.getPost}
     />
   );
 };
