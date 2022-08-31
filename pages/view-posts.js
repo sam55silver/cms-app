@@ -29,11 +29,16 @@ const ViewPosts = () => {
                 <span>{post.title}</span>
                 <p>{post.desc}</p>
                 <div className='flex gap-2'>
-                  {post.tags.split(',').map((tag, index) => (
-                    <span key={index} className='rounded-full bg-green-200 p-2'>
-                      {tag}
-                    </span>
-                  ))}
+                  {post.tags
+                    ? post.tags.split(',').map((tag, index) => (
+                        <span
+                          key={index}
+                          className='rounded-full bg-green-200 p-2'
+                        >
+                          {tag}
+                        </span>
+                      ))
+                    : null}
                 </div>
               </div>
             </Link>

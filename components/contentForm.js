@@ -13,9 +13,9 @@ const ContentForm = (props) => {
     if (props.postData) {
       const data = props.postData;
 
-      setTitle(data.title);
-      setTags(data.tags);
-      setDesc(data.desc);
+      setTitle(data.title || '');
+      setTags(data.tags || '');
+      setDesc(data.desc || '');
       // setUploadedFiles(data.content);
     }
   }, []);
@@ -24,10 +24,9 @@ const ContentForm = (props) => {
     event.preventDefault();
 
     const formValues = {
-      title: title,
-      tags: tags,
-      desc: desc,
-      content: uploadedFiles,
+      'title': title,
+      'tags': tags,
+      'desc': desc,
     };
 
     props.onSubmit(formValues);

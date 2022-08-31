@@ -66,7 +66,7 @@ const root = {
     try {
       const docQuery = db
         .orderBy(...(orderBy || ['title', 'desc']))
-        .limit(amount || 5);
+        .limit(amount || 10);
 
       const snapshot = await docQuery.get();
 
@@ -78,6 +78,15 @@ const root = {
       return posts;
     } catch {
       throw new Error('Error retrieving posts');
+    }
+  },
+
+  createPost: async ({ input }) => {
+    try {
+      const docRef = await db.add(input);
+      return new Post(docRef.id, input);
+    } catch {
+      throw new Error('Error adding document');
     }
   },
 };
