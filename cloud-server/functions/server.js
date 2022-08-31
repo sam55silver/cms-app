@@ -36,6 +36,7 @@ const schema = buildSchema(`
 
   type Query {
     getPost(id: ID!): Post
+    getPosts(amount: Int, orderBy: [String]): [Post]
   }
 `);
 
@@ -58,6 +59,25 @@ const root = {
       return new Post(id, doc.data());
     } else {
       throw new Error('Post dne!');
+    }
+  },
+
+  getPosts: async ({ amount, orderBy }) => {
+    try {
+      const docQuery = db
+        .orderBy(...(orderBy || ['title', 'desc']))
+        .limit(amount || 5);
+
+      const snapshot = await docQuery.get();
+
+      let posts = [];
+      snapshot.forEach((post) => {
+        posts.push(new Post(post.id, post.data()));
+      });
+
+      return posts;
+    } catch {
+      throw new Error('Error retrieving posts');
     }
   },
 };

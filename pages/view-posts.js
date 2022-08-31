@@ -1,30 +1,28 @@
-import useSWR from 'swr';
 import Link from 'next/link';
-import { getDocs } from 'firebase/firestore';
+import FetchData from '../helper/fetchData';
+import useSWR from 'swr';
 
-const fetcher = (colRef) =>
-  getDocs(colRef).then((snapshot) => {
-    let postsArray = [];
+const body = `
+{
+  getPosts {
+    title
+    tags
+    desc
+    id
+  }
+}
+`;
 
-    snapshot.docs.forEach((doc) => {
-      postsArray.push({ ...doc.data(), id: doc.id });
-      console.log('A read');
-    });
+const ViewPosts = () => {
+  const { data, error } = useSWR(body, FetchData);
 
-    return postsArray;
-  });
-
-const ViewPosts = ({ colRef }) => {
-  const { data, error } = useSWR(colRef, fetcher);
-
-  if (error) return <div>Failed to load</div>;
-  if (!data) return <div>loading...</div>;
+  if (!data) return <div>Loading...</div>;
 
   return (
     <div className='container mx-auto my-5'>
       <h1 className='text-2xl mb-5'>Viewing posts</h1>
       <div className='flex gap-5 flex-wrap'>
-        {data.map((post) => (
+        {data.getPosts.map((post) => (
           <div key={post.id}>
             <Link href={`/edit-posts/${post.id}`}>
               <div className='bg-slate-400 rounded-md p-5 hover:cursor-pointer'>
