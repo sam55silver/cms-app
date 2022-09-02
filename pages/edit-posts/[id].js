@@ -27,7 +27,7 @@ const DELETE_POST = gql`
   }
 `;
 
-const Post = () => {
+const Post = (props) => {
   const router = useRouter();
   const { id } = router.query;
 
@@ -46,6 +46,7 @@ const Post = () => {
     const savingDoc = updatePost({
       variables: { 'id': id, 'input': formValues },
     }).then(() => {
+      props.client.clearStore();
       router.push('/view-posts');
     });
 

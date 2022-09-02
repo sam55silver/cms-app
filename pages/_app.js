@@ -37,7 +37,7 @@ function MyApp({ Component, pageProps }) {
       <Toaster />
       <div className='flex h-full'>
         <Navigation />
-        <Component colRef={colRef} fbStorage={fbStorage} {...pageProps} />
+        <Component client={client} {...pageProps} />
       </div>
     </ApolloProvider>
   );

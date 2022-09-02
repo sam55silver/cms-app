@@ -12,12 +12,13 @@ const CREATE_POST = gql`
   }
 `;
 
-const CreateNewPost = () => {
+const CreateNewPost = (props) => {
   const router = useRouter();
 
   const [createPost, { data }] = useMutation(CREATE_POST);
 
   if (data) {
+    props.client.clearStore();
     router.push('/view-posts');
   }
 
