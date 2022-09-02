@@ -1,0 +1,23 @@
+input PostInput {
+  title: String
+  tags: String
+  desc: String
+}
+
+type Post {
+  id: ID!
+  title: String
+  tags: String
+  desc: String
+}
+
+type Mutation {
+  createPost(input: PostInput): Post
+  updatePost(id: ID!, input: PostInput): Post
+  deletePost(id: ID!): String
+}
+
+type Query {
+  getPost(id: ID!): Post
+  getPosts(amount: Int, orderBy: [String]): [Post]
+}

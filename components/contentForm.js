@@ -7,7 +7,7 @@ const ContentForm = (props) => {
   const [title, setTitle] = useState('');
   const [tags, setTags] = useState('');
   const [desc, setDesc] = useState('');
-  const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [content, setContent] = useState([]);
 
   useEffect(() => {
     if (props.postData) {
@@ -16,7 +16,7 @@ const ContentForm = (props) => {
       setTitle(data.title || '');
       setTags(data.tags || '');
       setDesc(data.desc || '');
-      // setUploadedFiles(data.content);
+      // setContent(data.content);
     }
   }, []);
 
@@ -34,7 +34,7 @@ const ContentForm = (props) => {
 
   const uploadHandler = async (event) => {
     const files = Array.from(event.target.files).map((file) => {
-      console.log('file', typeof file);
+      console.log('file being uploaded', file);
       const reader = new FileReader();
       return new Promise((resolve) => {
         let type;
@@ -57,16 +57,16 @@ const ContentForm = (props) => {
       });
     });
     const res = await Promise.all(files);
-    setUploadedFiles([...uploadedFiles, ...res]);
+    setContent([...content, ...res]);
   };
 
   const deleteFile = (event) => {
     const fileIndex = event.target.getAttribute('id');
 
-    let newUploadedFiles = uploadedFiles;
-    newUploadedFiles.splice(fileIndex, 1);
+    let newContent = content;
+    newContent.splice(fileIndex, 1);
 
-    setUploadedFiles([...newUploadedFiles]);
+    setContent([...newContent]);
   };
 
   const readFiles = () => {
@@ -74,7 +74,7 @@ const ContentForm = (props) => {
     let content = [];
     let renderedImages = [];
 
-    uploadedFiles.forEach((file, index) => {
+    content.forEach((file, index) => {
       // Create file headers
       const header = (
         <div
@@ -102,7 +102,7 @@ const ContentForm = (props) => {
 
             let imgSrc = null;
 
-            uploadedFiles.forEach((obj) => {
+            content.forEach((obj) => {
               if (obj.name == imgFileName) {
                 renderedImages.push(obj.name);
                 imgSrc = obj.content;
@@ -196,7 +196,7 @@ const ContentForm = (props) => {
           />
         </div>
 
-        {uploadedFiles.length != 0 ? readFiles() : <span>No Files</span>}
+        {content.length != 0 ? readFiles() : <span>No Files</span>}
 
         {props.buttonJsx}
       </form>
