@@ -53,4 +53,38 @@ module.exports = {
       throw new Error('Error retrieving posts');
     }
   },
+
+  // Create a single post with input
+  createPost: async ({ input }) => {
+    try {
+      // Create a new doc with input and return it as a post object
+      const docRef = await db.add(input);
+      return new Post(docRef.id, input);
+    } catch {
+      throw new Error('Error adding document');
+    }
+  },
+
+  // Update an existing post of ID
+  updatePost: async ({ id, input }) => {
+    try {
+      // Get and set the post pf ID
+      await db.doc(id).set(input);
+      // return post object
+      return new Post(id, input);
+    } catch {
+      throw new Error('Error updating document');
+    }
+  },
+
+  // Delete an existing post of ID
+  deletePost: async ({ id }) => {
+    try {
+      // Get and delete post of ID
+      await db.doc(id).delete();
+      return 'Deleted document';
+    } catch {
+      throw new Error('Error deleting document');
+    }
+  },
 };
