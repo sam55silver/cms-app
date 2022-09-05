@@ -1,12 +1,10 @@
-import { addDoc } from 'firebase/firestore';
-import { ref, uploadBytes } from 'firebase/storage';
 import toast from 'react-hot-toast';
 import ContentForm from '../components/contentForm';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import axios from 'axios';
 
-const CreateNewPost = ({ colRef, fbStorage }) => {
+const CreateNewPost = () => {
   const router = useRouter();
 
   const onSubmit = ({ title, tags, desc }) => {

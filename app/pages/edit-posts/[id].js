@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { doc, setDoc, deleteDoc } from 'firebase/firestore';
 import toast from 'react-hot-toast';
-
 import ContentForm from '../../components/contentForm';
 import FetchData from '../../helper/fetchData';
 
@@ -38,26 +36,10 @@ const Post = ({ colRef }) => {
   }
 
   const onSubmit = (formValues) => {
-    const savingDoc = setDoc(doc(colRef, id), formValues).then(() => {
-      router.push('/view-posts');
-    });
-
     toast.promise(savingDoc, {
       loading: 'Saving...',
       success: 'Saved Draft',
       error: 'Error when saving',
-    });
-  };
-
-  const deletePost = () => {
-    const deletingPost = deleteDoc(doc(colRef, id)).then(() => {
-      router.push('/view-posts');
-    });
-
-    toast.promise(deletingPost, {
-      loading: 'Deleting...',
-      success: 'Deleted Post',
-      error: 'Error when deleting',
     });
   };
 
@@ -69,7 +51,7 @@ const Post = ({ colRef }) => {
 
       <button
         type='button'
-        onClick={deletePost}
+        // onClick={deletePost}
         className='bg-red-500 primary-btn'
       >
         Delete
