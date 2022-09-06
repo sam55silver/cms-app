@@ -1,45 +1,44 @@
-import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import toast from 'react-hot-toast';
 import ContentForm from '../../components/contentForm';
-import FetchData from '../../helper/fetchData';
+import useSWR, { mutate } from 'swr';
+import { client, getPost, getPosts, updatePost } from '../../lib/graphql';
 
-const query = `
-query Post($id: ID!) {
-  getPost(id: $id) {
-    title
-    tags
-    desc
-    id
-  }
-}
-`;
-
-const Post = ({ colRef }) => {
+const Post = () => {
   const router = useRouter();
   const id = router.query.id;
 
-  const [data, setData] = useState(null);
+  const { data, error } = useSWR(() => (id ? [getPost, { 'id': id }] : null));
 
-  useEffect(() => {
-    console.log('fetching data. ID:', id);
-
-    if (id) {
-      FetchData(query, { id: id }).then((data) => {
-        setData(data.getPost);
-      });
-    }
-  }, [router]);
-
-  if (!data) {
-    return <div>loading...</div>;
-  }
+  if (error) return <span>Error loading post!</span>;
+  if (!data) return <span>Loading...</span>;
 
   const onSubmit = (formValues) => {
-    toast.promise(savingDoc, {
+    const savingPost = client
+      .request(updatePost, {
+        'id': id,
+        'input': formValues,
+      })
+      .then((returnedData) =>
+        mutate([getPost, { 'id': id }], returnedData.updatePosts, {
+          optimisticData: returnedData.updatePosts,
+        })
+      );
+
+    toast.promise(savingPost, {
       loading: 'Saving...',
       success: 'Saved Draft',
       error: 'Error when saving',
+    });
+  };
+
+  const deletePost = () => {
+    const deletingPost = FetchData(deletePostQuery, { 'id': id });
+
+    toast.promise(deletingPost, {
+      loading: 'deleting...',
+      success: 'Deleted Post',
+      error: 'Error when deleting',
     });
   };
 
@@ -51,7 +50,7 @@ const Post = ({ colRef }) => {
 
       <button
         type='button'
-        // onClick={deletePost}
+        onClick={deletePost}
         className='bg-red-500 primary-btn'
       >
         Delete
@@ -64,7 +63,7 @@ const Post = ({ colRef }) => {
       header='Edit post'
       buttonJsx={buttonJsx}
       onSubmit={onSubmit}
-      postData={data}
+      postData={data.getPost}
     />
   );
 };

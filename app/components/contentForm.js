@@ -27,7 +27,7 @@ const ContentForm = (props) => {
       title: title,
       tags: tags,
       desc: desc,
-      content: uploadedFiles,
+      // content: uploadedFiles,
     };
 
     props.onSubmit(formValues);

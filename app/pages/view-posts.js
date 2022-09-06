@@ -1,22 +1,12 @@
 import Link from 'next/link';
-import FetchData from '../helper/fetchData';
 import useSWR from 'swr';
-
-const body = `
-{
-  getPosts {
-    title
-    tags
-    desc
-    id
-  }
-}
-`;
+import { getPosts } from '../lib/graphql';
 
 const ViewPosts = () => {
-  const { data, error } = useSWR(body, FetchData);
+  const { data, error } = useSWR([getPosts]);
 
-  if (!data) return <div>Loading...</div>;
+  if (error) return <span>Error fetching posts</span>;
+  if (!data) return <span>Loading...</span>;
 
   return (
     <div className='container mx-auto my-5'>
