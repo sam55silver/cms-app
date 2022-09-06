@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 const Navigation = () => {
   return (
-    <div className='flex flex-col bg-slate-400 h-full text-2xl'>
+    <div className='flex flex-col bg-slate-400 text-2xl'>
       <Link href='/'>
         <span className='nav-btn'>Home</span>
       </Link>

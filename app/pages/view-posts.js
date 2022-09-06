@@ -9,21 +9,26 @@ const ViewPosts = () => {
   if (!data) return <span>Loading...</span>;
 
   return (
-    <div className='container mx-auto my-5'>
-      <h1 className='text-2xl mb-5'>Viewing posts</h1>
+    <div className='container mx-auto p-5'>
+      <h1 className='text-2xl font-bold mb-5'>Viewing posts</h1>
       <div className='flex gap-5 flex-wrap'>
         {data.getPosts.map((post) => (
           <div key={post.id}>
             <Link href={`/edit-posts/${post.id}`}>
-              <div className='bg-slate-400 rounded-md p-5 hover:cursor-pointer'>
+              <div className='bg-slate-400 flex flex-col gap-1 rounded-md p-5 h-40 w-48 hover:cursor-pointer '>
                 <span>{post.title}</span>
                 <p>{post.desc}</p>
                 <div className='flex gap-2'>
-                  {post.tags.split(',').map((tag, index) => (
-                    <span key={index} className='rounded-full bg-green-200 p-2'>
-                      {tag}
-                    </span>
-                  ))}
+                  {post.tags
+                    ? post.tags.split(',').map((tag, index) => (
+                        <span
+                          key={index}
+                          className='rounded-full bg-green-200 p-2'
+                        >
+                          {tag}
+                        </span>
+                      ))
+                    : ''}
                 </div>
               </div>
             </Link>

@@ -16,7 +16,7 @@ function MyApp({ Component, pageProps }) {
       }}
     >
       <Toaster />
-      <div className='flex h-full'>
+      <div className='flex h-screen'>
         <Navigation />
         <Component {...pageProps} />
       </div>
