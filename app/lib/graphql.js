@@ -35,6 +35,17 @@ export const updatePost = /* GraphQL */ `
   }
 `;
 
+export const createPost = /* GraphQL */ `
+  mutation createPost($input: PostInput) {
+    createPost(input: $input) {
+      title
+      tags
+      desc
+      id
+    }
+  }
+`;
+
 export const deletePostQuery = /* GraphQL */ `
   mutation deletePost($id: ID!) {
     deletePost(id: $id)

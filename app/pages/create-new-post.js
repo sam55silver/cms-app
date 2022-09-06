@@ -2,52 +2,19 @@ import toast from 'react-hot-toast';
 import ContentForm from '../components/contentForm';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { client, createPost } from '../lib/graphql';
 
 const CreateNewPost = () => {
   const router = useRouter();
 
-  const onSubmit = ({ title, tags, desc }) => {
-    const url = 'http://localhost:5001/cms-app-1a47d/us-central1/app/graphql';
-    const headers = {
-      'content-type': 'application/json',
-    };
-    const body = `
-    query Post($id: ID!) {
-      getPost(id: $id) {
-        title
-        tags
-        desc
-        id
-      }
-    }
-    `;
-
-    const fetchData = new Promise((res, rej) => {
-      axios({
-        url: url,
-        method: 'post',
-        headers: headers,
-        data: {
-          query: body,
-          variables: { id: 'CFc1ZUEGVztMZCTSjEPK' },
-        },
+  const onSubmit = (formValues) => {
+    const creatingPost = client
+      .request(createPost, {
+        'input': formValues,
       })
-        .then(({ data: { data, errors } }) => {
-          if (errors) {
-            rej(errors);
-          } else {
-            res(data);
-          }
-        })
-        .catch((err) => {
-          rej(err);
-          console.log(err);
-        });
-    }).then((data) => {
-      console.log(data);
-    });
+      .then(() => router.push('/view-posts'));
 
-    toast.promise(fetchData, {
+    toast.promise(creatingPost, {
       loading: 'Saving...',
       success: 'Saved Draft',
       error: 'Error when saving',

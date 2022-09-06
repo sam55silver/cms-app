@@ -2,7 +2,12 @@ import { useRouter } from 'next/router';
 import toast from 'react-hot-toast';
 import ContentForm from '../../components/contentForm';
 import useSWR, { mutate } from 'swr';
-import { client, getPost, getPosts, updatePost } from '../../lib/graphql';
+import {
+  client,
+  getPost,
+  deletePostQuery,
+  updatePost,
+} from '../../lib/graphql';
 
 const Post = () => {
   const router = useRouter();
@@ -19,11 +24,17 @@ const Post = () => {
         'id': id,
         'input': formValues,
       })
-      .then((returnedData) =>
-        mutate([getPost, { 'id': id }], returnedData.updatePosts, {
-          optimisticData: returnedData.updatePosts,
-        })
-      );
+      .then(async (res) => {
+        const returnedData = res.updatePost;
+
+        try {
+          await mutate([getPost, { 'id': id }], returnedData, {
+            optimisticData: returnedData,
+          }).then(() => router.push('/view-posts'));
+        } catch (err) {
+          console.log('error', err);
+        }
+      });
 
     toast.promise(savingPost, {
       loading: 'Saving...',
@@ -33,7 +44,11 @@ const Post = () => {
   };
 
   const deletePost = () => {
-    const deletingPost = FetchData(deletePostQuery, { 'id': id });
+    const deletingPost = client
+      .request(deletePostQuery, { 'id': id })
+      .then(() =>
+        mutate([getPost, { 'id': id }]).then(() => router.push('/view-posts'))
+      );
 
     toast.promise(deletingPost, {
       loading: 'deleting...',
