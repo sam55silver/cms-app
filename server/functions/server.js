@@ -20,8 +20,10 @@ app.use(cors({ origin: true }));
 
 // Build graphql in express via http
 const { graphqlHTTP } = require('express-graphql');
+const { graphqlUploadExpress } = require('graphql-upload-minimal');
 app.use(
   '/graphql',
+  graphqlUploadExpress(),
   graphqlHTTP({ schema: typeDefs, rootValue: resolvers, graphiql: true })
 );
 
