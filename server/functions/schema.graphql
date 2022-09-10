@@ -4,6 +4,18 @@ input PostInput {
   desc: String
 }
 
+input FileUpload {
+  fileName: String!
+  base64String: String!
+  type: String
+}
+
+type File {
+  fileName: String!
+  uri: String!
+  type: String
+}
+
 type Post {
   id: ID!
   title: String
@@ -15,6 +27,7 @@ type Mutation {
   createPost(input: PostInput): Post
   updatePost(id: ID!, input: PostInput): Post
   deletePost(id: ID!): String
+  fileUpload(files: [FileUpload]!): [File]!
 }
 
 type Query {

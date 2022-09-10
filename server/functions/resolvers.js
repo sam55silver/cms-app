@@ -1,9 +1,21 @@
 // Firebase init
 const admin = require('firebase-admin');
-admin.initializeApp();
+const serviceAccount = require('./serviceAccountKey.json');
+admin.initializeApp({
+  projectId: serviceAccount.project_id,
+  credential: admin.credential.cert(serviceAccount),
+});
 
-// Store database ref
+const stream = require('stream');
+
+// Firestore database ref
 const db = admin.firestore().collection('posts');
+
+// Storage bucket ref
+const { Storage } = require('@google-cloud/storage');
+const storage = new Storage();
+
+const bucket = storage.bucket('cms-app-1a47d.appspot.com'); // TO-DO: make private
 
 // Post structure
 class Post {
@@ -12,6 +24,15 @@ class Post {
     this.title = title;
     this.tags = tags;
     this.desc = desc;
+  }
+}
+
+// File structure
+class File {
+  constructor(fileName, uri, type) {
+    this.fileName = fileName;
+    this.uri = uri;
+    this.type = type;
   }
 }
 
@@ -86,5 +107,61 @@ module.exports = {
     } catch {
       throw new Error('Error deleting document');
     }
+  },
+
+  fileUpload: async ({ files }) => {
+    const uploadFiles = files.map(async (file) => {
+      // Decode base64 string to get files bytes
+      const filesBytes = Buffer.from(file.base64String, 'base64');
+
+      // Set files bytes into a stream to insert into bucket
+      const bufferStream = new stream.PassThrough();
+      bufferStream.end(filesBytes);
+
+      // Get ref of File
+      const fileRef = bucket.file(file.fileName);
+
+      return new Promise((resolve, reject) => {
+        // stream bytes to google bucket
+        bufferStream
+          .pipe(
+            fileRef
+              .createWriteStream({
+                metadata: {
+                  contentType: file.type,
+                  metadata: {
+                    custom: 'metadata',
+                  },
+                },
+                public: false,
+                validation: 'md5',
+              })
+              .on('error', (err) => {
+                reject(err);
+              })
+          )
+          .on('error', (err) => {
+            reject(err);
+          })
+          .on('finish', () => {
+            // Create temp download URI
+            fileRef
+              .getSignedUrl({
+                action: 'read',
+                expires: Date.now() + 24 * 60 * 60 * 1000, // Keep URI live for a day
+              })
+              .then((uri) =>
+                resolve(new File(file.fileName, uri[0], file.type))
+              )
+              .catch((err) => {
+                reject(err);
+              });
+          });
+      });
+    });
+
+    // Wait for all files to be uploaded and get signedURIs, then return files
+    const res = await Promise.all(uploadFiles);
+    return res;
   },
 };

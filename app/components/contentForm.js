@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { marked } from 'marked';
 import parse from 'html-react-parser';
 import Image from 'next/image';
+import { client, fileUpload } from '../lib/graphql';
+import toast from 'react-hot-toast';
 
 const ContentForm = (props) => {
   const [title, setTitle] = useState('');
@@ -35,30 +37,34 @@ const ContentForm = (props) => {
 
   const uploadHandler = async (event) => {
     const files = Array.from(event.target.files).map((file) => {
-      console.log('file', typeof file);
+      console.log('looking at', file);
       const reader = new FileReader();
+
       return new Promise((resolve) => {
-        let type;
+        reader.onload = () => {
+          const base64String = reader.result.split(',')[1];
+          const fileName = file.name;
+          const type = file.type;
+          resolve({ base64String, fileName, type });
+        };
 
-        reader.onload = () =>
-          resolve({
-            name: file.name,
-            type: type,
-            file: file,
-            content: reader.result,
-          });
-
-        if (file.name.includes('.md')) {
-          type = 'text';
-          reader.readAsText(file);
-        } else if (file.type.includes('image')) {
-          type = 'image';
-          reader.readAsDataURL(file);
-        }
+        reader.readAsDataURL(file);
       });
     });
-    const res = await Promise.all(files);
-    setUploadedFiles([...uploadedFiles, ...res]);
+
+    const res = Promise.all(files).then((result) =>
+      client
+        .request(fileUpload, { 'files': result })
+        .then((keys) => console.log('file uris', keys))
+    );
+
+    toast.promise(res, {
+      loading: 'Uploading...',
+      success: 'Uploaded files',
+      error: 'Error when uploading',
+    });
+
+    // setUploadedFiles([...uploadedFiles, ...res]);
   };
 
   const deleteFile = (event) => {
