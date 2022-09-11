@@ -8,11 +8,15 @@ const CreateNewPost = () => {
   const router = useRouter();
 
   const onSubmit = (formValues) => {
+    console.log('submitting form', formValues);
     const creatingPost = client
       .request(createPost, {
         'input': formValues,
       })
-      .then(() => router.push('/view-posts'));
+      .then((res) => {
+        console.log('created post', res);
+        // router.push('/view-posts');
+      });
 
     toast.promise(creatingPost, {
       loading: 'Saving...',

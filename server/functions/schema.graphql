@@ -1,13 +1,14 @@
-input PostInput {
-  title: String
-  tags: String
-  desc: String
-}
-
 input FileUpload {
   fileName: String!
   base64String: String!
   type: String
+}
+
+input PostInput {
+  title: String
+  tags: String
+  desc: String
+  files: [FileUpload]
 }
 
 type File {
@@ -21,13 +22,13 @@ type Post {
   title: String
   tags: String
   desc: String
+  files: [File]
 }
 
 type Mutation {
   createPost(input: PostInput): Post
   updatePost(id: ID!, input: PostInput): Post
   deletePost(id: ID!): String
-  fileUpload(files: [FileUpload]!): [File]!
 }
 
 type Query {

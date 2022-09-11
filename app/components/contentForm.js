@@ -29,7 +29,7 @@ const ContentForm = (props) => {
       title: title,
       tags: tags,
       desc: desc,
-      // content: uploadedFiles,
+      files: uploadedFiles,
     };
 
     props.onSubmit(formValues);
@@ -52,19 +52,7 @@ const ContentForm = (props) => {
       });
     });
 
-    const res = Promise.all(files).then((result) =>
-      client
-        .request(fileUpload, { 'files': result })
-        .then((keys) => console.log('file uris', keys))
-    );
-
-    toast.promise(res, {
-      loading: 'Uploading...',
-      success: 'Uploaded files',
-      error: 'Error when uploading',
-    });
-
-    // setUploadedFiles([...uploadedFiles, ...res]);
+    Promise.all(files).then((result) => setUploadedFiles(result));
   };
 
   const deleteFile = (event) => {
@@ -203,7 +191,7 @@ const ContentForm = (props) => {
           />
         </div>
 
-        {uploadedFiles.length != 0 ? readFiles() : <span>No Files</span>}
+        {/* {uploadedFiles.length != 0 ? readFiles() : <span>No Files</span>} */}
 
         {props.buttonJsx}
       </form>

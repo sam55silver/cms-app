@@ -19,11 +19,12 @@ const bucket = storage.bucket('cms-app-1a47d.appspot.com'); // TO-DO: make priva
 
 // Post structure
 class Post {
-  constructor(id, { title, tags, desc }) {
+  constructor(id, { title, tags, desc, files }) {
     this.id = id;
     this.title = title;
     this.tags = tags;
     this.desc = desc;
+    this.files = files;
   }
 }
 
@@ -36,80 +37,12 @@ class File {
   }
 }
 
-// Resolvers
-module.exports = {
-  // fetch a single post with ID
-  getPost: async ({ id }) => {
-    const docRef = db.doc(id);
+// Decode base64 strings into files and upload to google bucket
+const fileUpload = async (files) => {
+  // Check if input has files
+  if (files) {
+    console.log('Uploading files');
 
-    const doc = await docRef.get();
-
-    if (doc.exists) {
-      return new Post(id, doc.data());
-    } else {
-      throw new Error('Post dne!');
-    }
-  },
-
-  // Fetch multiple posts
-  getPosts: async ({ amount, orderBy }) => {
-    try {
-      const docQuery = db
-        // If no orderby, default to title
-        .orderBy(...(orderBy || ['title', 'desc']))
-        // If no amount, default to 10
-        .limit(amount || 10);
-
-      // get posts' docs
-      const snapshot = await docQuery.get();
-
-      // For each doc create a new post class
-      let posts = [];
-      snapshot.forEach((post) => {
-        posts.push(new Post(post.id, post.data()));
-      });
-
-      return posts;
-    } catch {
-      throw new Error('Error retrieving posts');
-    }
-  },
-
-  // Create a single post with input
-  createPost: async ({ input }) => {
-    try {
-      // Create a new doc with input and return it as a post object
-      const docRef = await db.add(input);
-      return new Post(docRef.id, input);
-    } catch {
-      throw new Error('Error adding document');
-    }
-  },
-
-  // Update an existing post of ID
-  updatePost: async ({ id, input }) => {
-    try {
-      // Get and set the post pf ID
-      await db.doc(id).set(input);
-      // return post object
-      return new Post(id, input);
-    } catch {
-      throw new Error('Error updating document');
-    }
-  },
-
-  // Delete an existing post of ID
-  deletePost: async ({ id }) => {
-    try {
-      // Get and delete post of ID
-      await db.doc(id).delete();
-      return 'Deleted document';
-    } catch {
-      throw new Error('Error deleting document');
-    }
-  },
-
-  fileUpload: async ({ files }) => {
     const uploadFiles = files.map(async (file) => {
       // Decode base64 string to get files bytes
       const filesBytes = Buffer.from(file.base64String, 'base64');
@@ -150,9 +83,9 @@ module.exports = {
                 action: 'read',
                 expires: Date.now() + 24 * 60 * 60 * 1000, // Keep URI live for a day
               })
-              .then((uri) =>
-                resolve(new File(file.fileName, uri[0], file.type))
-              )
+              .then((uri) => {
+                resolve(new File(file.fileName, uri[0], file.type));
+              })
               .catch((err) => {
                 reject(err);
               });
@@ -163,5 +96,92 @@ module.exports = {
     // Wait for all files to be uploaded and get signedURIs, then return files
     const res = await Promise.all(uploadFiles);
     return res;
+  } else {
+    return null;
+  }
+};
+
+// Resolvers
+module.exports = {
+  // fetch a single post with ID
+  getPost: async ({ id }) => {
+    const docRef = db.doc(id);
+
+    const doc = await docRef.get();
+
+    if (doc.exists) {
+      return new Post(id, doc.data());
+    } else {
+      throw new Error('Post dne!');
+    }
+  },
+
+  // Fetch multiple posts
+  getPosts: async ({ amount, orderBy }) => {
+    try {
+      const docQuery = db
+        // If no orderby, default to title
+        .orderBy(...(orderBy || ['title', 'desc']))
+        // If no amount, default to 10
+        .limit(amount || 10);
+
+      // get posts' docs
+      const snapshot = await docQuery.get();
+
+      // For each doc create a new post class
+      let posts = [];
+      snapshot.forEach((post) => {
+        posts.push(new Post(post.id, post.data()));
+      });
+
+      return posts;
+    } catch {
+      throw new Error('Error retrieving posts');
+    }
+  },
+
+  // Create a single post with input and upload files
+  createPost: async ({ input }) => {
+    try {
+      // If files exist in input, upload them
+      input.files = await fileUpload(input.files);
+      console.log(input.files);
+
+      // Create a new doc with input and return it as a post object
+      const docRef = await db.add({
+        title: input.title,
+        tags: input.tags,
+        desc: input.desc,
+      });
+      return new Post(docRef.id, input);
+    } catch (err) {
+      throw new Error(err);
+    }
+  },
+
+  // Update an existing post of ID
+  updatePost: async ({ id, input }) => {
+    try {
+      // If files exist in input, upload them
+      input = await fileUpload(input);
+
+      // Get and set the post pf ID
+      await db.doc(id).set(input);
+      // return post object
+      return new Post(id, input);
+    } catch {
+      throw new Error('Error updating document');
+    }
+  },
+
+  // Delete an existing post of ID
+  deletePost: async ({ id }) => {
+    try {
+      // Get and delete post of ID
+      await db.doc(id).delete();
+      return 'Deleted document';
+    } catch {
+      throw new Error('Error deleting document');
+    }
   },
 };

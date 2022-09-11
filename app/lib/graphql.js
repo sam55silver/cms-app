@@ -10,6 +10,7 @@ export const getPost = /* GraphQL */ `
       title
       tags
       desc
+      files
     }
   }
 `;
@@ -21,6 +22,7 @@ export const getPosts = /* GraphQL */ `
       tags
       desc
       id
+      files
     }
   }
 `;
@@ -31,6 +33,7 @@ export const updatePost = /* GraphQL */ `
       title
       tags
       desc
+      files
     }
   }
 `;
@@ -42,6 +45,10 @@ export const createPost = /* GraphQL */ `
       tags
       desc
       id
+      files {
+        uri
+        fileName
+      }
     }
   }
 `;
@@ -49,13 +56,5 @@ export const createPost = /* GraphQL */ `
 export const deletePostQuery = /* GraphQL */ `
   mutation deletePost($id: ID!) {
     deletePost(id: $id)
-  }
-`;
-
-export const fileUpload = /* GraphQL */ `
-  mutation fileUpload($files: [FileUpload]!) {
-    fileUpload(files: $files) {
-      uri
-    }
   }
 `;
