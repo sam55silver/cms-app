@@ -38,7 +38,7 @@ class File {
 }
 
 // Decode base64 strings into files and upload to google bucket
-const fileUpload = async (files) => {
+const fileUpload = async (files, postID) => {
   // Check if input has files
   if (files) {
     console.log('Uploading files');
@@ -52,7 +52,7 @@ const fileUpload = async (files) => {
       bufferStream.end(filesBytes);
 
       // Get ref of File
-      const fileRef = bucket.file(file.fileName);
+      const fileRef = bucket.file(postID + '/' + file.fileName);
 
       return new Promise((resolve, reject) => {
         // stream bytes to google bucket
@@ -101,6 +101,18 @@ const fileUpload = async (files) => {
   }
 };
 
+const fetchFileURI = async (postID) => {
+  const options = {
+    prefix: postID + '/',
+  };
+
+  const [files] = await bucket.getFiles(options);
+
+  files.forEach((file) => {
+    console.log(file.name);
+  });
+};
+
 // Resolvers
 module.exports = {
   // fetch a single post with ID
@@ -130,7 +142,10 @@ module.exports = {
 
       // For each doc create a new post class
       let posts = [];
-      snapshot.forEach((post) => {
+      snapshot.forEach(async (post) => {
+        console.log('getting post files');
+        const files = await fetchFileURI(post.id);
+        console.log('done getting post files');
         posts.push(new Post(post.id, post.data()));
       });
 
@@ -143,16 +158,16 @@ module.exports = {
   // Create a single post with input and upload files
   createPost: async ({ input }) => {
     try {
-      // If files exist in input, upload them
-      input.files = await fileUpload(input.files);
-      console.log(input.files);
-
       // Create a new doc with input and return it as a post object
       const docRef = await db.add({
         title: input.title,
         tags: input.tags,
         desc: input.desc,
       });
+
+      // If files exist in input, upload them
+      input.files = await fileUpload(input.files, docRef.id);
+
       return new Post(docRef.id, input);
     } catch (err) {
       throw new Error(err);

@@ -22,7 +22,9 @@ export const getPosts = /* GraphQL */ `
       tags
       desc
       id
-      files
+      files {
+        uri
+      }
     }
   }
 `;
