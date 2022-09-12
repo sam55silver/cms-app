@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { marked } from 'marked';
 import parse from 'html-react-parser';
 import Image from 'next/image';
+import { client, uploadFile } from '../lib/graphql';
+import toast from 'react-hot-toast';
 
 const ContentForm = (props) => {
   const [title, setTitle] = useState('');
@@ -22,43 +24,75 @@ const ContentForm = (props) => {
 
   const onSubmit = (event) => {
     event.preventDefault();
+    console.log(event);
 
-    const formValues = {
-      title: title,
-      tags: tags,
-      desc: desc,
-      // content: uploadedFiles,
-    };
+    // const formValues = {
+    //   title: title,
+    //   tags: tags,
+    //   desc: desc,
+    //   // content: uploadedFiles[0].file,
+    // };
 
-    props.onSubmit(formValues);
+    // props.onSubmit(formValues);
   };
 
   const uploadHandler = async (event) => {
-    const files = Array.from(event.target.files).map((file) => {
-      console.log('file', typeof file);
-      const reader = new FileReader();
-      return new Promise((resolve) => {
-        let type;
+    // toast.promise(uploadingFile, {
+    //   loading: 'Uploading...',
+    //   success: 'Uploaded File',
+    //   error: 'Error when uploading file',
+    // });
 
-        reader.onload = () =>
-          resolve({
-            name: file.name,
-            type: type,
-            file: file,
-            content: reader.result,
-          });
+    // const files = Array.from(event.target.files).map((file) => {
+    //   const reader = new FileReader();
+    //   return new Promise((resolve) => {
+    //     // let type;
 
-        if (file.name.includes('.md')) {
-          type = 'text';
-          reader.readAsText(file);
-        } else if (file.type.includes('image')) {
-          type = 'image';
-          reader.readAsDataURL(file);
-        }
-      });
-    });
-    const res = await Promise.all(files);
-    setUploadedFiles([...uploadedFiles, ...res]);
+    //     // reader.onload = () =>
+    //     //   resolve({
+    //     //     name: file.name,
+    //     //     type: type,
+    //     //     file: file,
+    //     //     content: reader.result,
+    //     //   });
+    //     reader.onload = () => {
+    //       resolve(reader.result);
+    //     };
+    //     reader.readAsArrayBuffer(file);
+
+    //     // if (file.name.includes('.md')) {
+    //     //   type = 'text';
+    //     //   reader.readAsText(file);
+    //     // } else if (file.type.includes('image')) {
+    //     //   type = 'image';
+    //     //   reader.readAsDataURL(file);
+    //     // }
+    //   });
+    // });
+    // const res = await Promise.all(files);
+
+    const file = event.target.files[0];
+    console.log(file);
+
+    // const fileData = new FormData();
+
+    // const operation = { query: uploadFile, variables: { files: null } };
+    // fileData.append('operations', JSON.stringify(operation));
+
+    // const map = `{"0": ["variables.file"]}`;
+    // fileData.append('map', map);
+    // fileData.append('0', file);
+
+    // try {
+    //   const resq = await client.request(uploadFile, { file: file });
+    //   console.log('data', resq);
+    // } catch (err) {
+    //   console.error('error', err);
+    // }
+
+    // reader.readAsBinaryString(file);
+
+    // setUploadedFiles([...uploadedFiles, ...res]);
   };
 
   const deleteFile = (event) => {
@@ -145,7 +179,11 @@ const ContentForm = (props) => {
 
   return (
     <div className='container mx-auto p-5'>
-      <form onSubmit={onSubmit} className='flex flex-col gap-5'>
+      <form
+        encType='multipart/form-data'
+        onSubmit={onSubmit}
+        className='flex flex-col gap-5'
+      >
         <h1 className='text-2xl font-bold'>{props.header}</h1>
 
         <div>

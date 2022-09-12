@@ -1,9 +1,18 @@
 // Firebase init
 const admin = require('firebase-admin');
-admin.initializeApp();
+const { GraphQLUpload } = require('graphql-upload');
+
+const serviceAccount = require('../serviceAccountKey.json');
+admin.initializeApp({
+  projectId: serviceAccount.project_id,
+  credential: admin.credential.cert(serviceAccount),
+  storageBucket: 'cms-app-1a47d.appspot.com',
+});
 
 // Store database ref
 const db = admin.firestore().collection('posts');
+// storage ref
+const bucket = admin.storage().bucket();
 
 // Post structure
 class Post {
@@ -85,6 +94,28 @@ module.exports = {
       return 'Deleted document';
     } catch {
       throw new Error('Error deleting document');
+    }
+  },
+
+  Upload: GraphQLUpload,
+
+  singleFile: async (file) => {
+    try {
+      console.log(file);
+      return 'file';
+      // const sizeOfString = new TextEncoder().encode(file).length;
+      // return `Size of file: ${sizeOfString} bytes`;
+
+      // const fileRef = bucket.file(`photo.jpeg`);
+      // const options = {
+      //   resumable: false,
+      //   metadata: { contentType: 'image/jpeg' },
+      // };
+
+      // await fileRef.save(file, options);
+      // return 'file uploaded';
+    } catch (err) {
+      throw new Error('Error', err);
     }
   },
 };

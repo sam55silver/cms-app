@@ -20,10 +20,10 @@ app.use(cors({ origin: true }));
 
 // Build graphql in express via http
 const { graphqlHTTP } = require('express-graphql');
-const { graphqlUploadExpress } = require('graphql-upload-minimal');
+const { graphqlUploadExpress } = require('graphql-upload');
 app.use(
   '/graphql',
-  graphqlUploadExpress(),
+  graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 10 }),
   graphqlHTTP({ schema: typeDefs, rootValue: resolvers, graphiql: true })
 );
 

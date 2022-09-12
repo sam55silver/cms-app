@@ -51,3 +51,9 @@ export const deletePostQuery = /* GraphQL */ `
     deletePost(id: $id)
   }
 `;
+
+export const uploadPost = /* GraphQL */ `
+  mutation singleUpload($file: Upload!) {
+    uploadFile(file: $file)
+  }
+`;
