@@ -13,10 +13,7 @@ const CreateNewPost = () => {
       .request(createPost, {
         'input': formValues,
       })
-      .then((res) => {
-        console.log('created post', res);
-        // router.push('/view-posts');
-      });
+      .then(() => router.push('/view-posts'));
 
     toast.promise(creatingPost, {
       loading: 'Saving...',

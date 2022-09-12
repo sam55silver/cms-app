@@ -2,8 +2,6 @@ import { useEffect, useState } from 'react';
 import { marked } from 'marked';
 import parse from 'html-react-parser';
 import Image from 'next/image';
-import { client, fileUpload } from '../lib/graphql';
-import toast from 'react-hot-toast';
 
 const ContentForm = (props) => {
   const [title, setTitle] = useState('');
@@ -18,7 +16,7 @@ const ContentForm = (props) => {
       setTitle(data.title);
       setTags(data.tags);
       setDesc(data.desc);
-      // setUploadedFiles(data.content);
+      setUploadedFiles(data.files);
     }
   }, []);
 
@@ -191,7 +189,9 @@ const ContentForm = (props) => {
           />
         </div>
 
-        {/* {uploadedFiles.length != 0 ? readFiles() : <span>No Files</span>} */}
+        {uploadedFiles.map((file, index) => (
+          <img key={index} src={file.uri} />
+        ))}
 
         {props.buttonJsx}
       </form>

@@ -10,7 +10,10 @@ export const getPost = /* GraphQL */ `
       title
       tags
       desc
-      files
+      files {
+        fileName
+        uri
+      }
     }
   }
 `;
@@ -22,9 +25,6 @@ export const getPosts = /* GraphQL */ `
       tags
       desc
       id
-      files {
-        uri
-      }
     }
   }
 `;

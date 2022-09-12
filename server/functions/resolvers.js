@@ -108,9 +108,26 @@ const fetchFileURI = async (postID) => {
 
   const [files] = await bucket.getFiles(options);
 
-  files.forEach((file) => {
-    console.log(file.name);
+  const fileObjs = files.map((file) => {
+    return new Promise((resolve, reject) => {
+      try {
+        const fileName = file.metadata.name.split('/').at(-1);
+        const type = file.metadata.contentType;
+
+        file
+          .getSignedUrl({
+            action: 'read',
+            expires: Date.now() + 24 * 60 * 60 * 1000, // Keep URI live for a day
+          })
+          .then((uri) => resolve(new File(fileName, uri[0], type)));
+      } catch (err) {
+        reject(err);
+      }
+    });
   });
+
+  const res = await Promise.all(fileObjs);
+  return res;
 };
 
 // Resolvers
@@ -122,7 +139,9 @@ module.exports = {
     const doc = await docRef.get();
 
     if (doc.exists) {
-      return new Post(id, doc.data());
+      const files = await fetchFileURI(doc.id);
+      const input = { ...doc.data(), files: files };
+      return new Post(id, input);
     } else {
       throw new Error('Post dne!');
     }
@@ -140,18 +159,27 @@ module.exports = {
       // get posts' docs
       const snapshot = await docQuery.get();
 
-      // For each doc create a new post class
-      let posts = [];
-      snapshot.forEach(async (post) => {
-        console.log('getting post files');
-        const files = await fetchFileURI(post.id);
-        console.log('done getting post files');
-        posts.push(new Post(post.id, post.data()));
+      // Get each posts data
+      let postObjs = [];
+      snapshot.forEach((post) => {
+        postObjs.push({ id: post.id, input: post.data() });
       });
 
+      let posts = [];
+
+      // For each post create a new post class
+      for (var postIndex in postObjs) {
+        const post = postObjs[postIndex];
+
+        // Uncomment to get files in getPosts call
+        // post.input['files'] = await fetchFileURI(post.id);
+
+        posts.push(new Post(post.id, post.input));
+      }
+
       return posts;
-    } catch {
-      throw new Error('Error retrieving posts');
+    } catch (err) {
+      throw new Error(err);
     }
   },
 
