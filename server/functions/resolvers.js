@@ -160,22 +160,22 @@ module.exports = {
       const snapshot = await docQuery.get();
 
       // Get each posts data
-      let postObjs = [];
+      let posts = [];
+      // let postObjs = [];
       snapshot.forEach((post) => {
-        postObjs.push({ id: post.id, input: post.data() });
+        // postObjs.push({ id: post.id, input: post.data() });
+        posts.push(new Post(post.id, post.data()));
       });
 
-      let posts = [];
-
+      // Uncomment to get files in getPosts call
       // For each post create a new post class
-      for (var postIndex in postObjs) {
-        const post = postObjs[postIndex];
+      // for (var postIndex in postObjs) {
+      //   const post = postObjs[postIndex];
 
-        // Uncomment to get files in getPosts call
-        // post.input['files'] = await fetchFileURI(post.id);
+      //   post.input['files'] = await fetchFileURI(post.id);
 
-        posts.push(new Post(post.id, post.input));
-      }
+      //   posts.push(new Post(post.id, post.input));
+      // }
 
       return posts;
     } catch (err) {
