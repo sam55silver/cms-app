@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { marked } from 'marked';
-import parse from 'html-react-parser';
+import parse, { Comment } from 'html-react-parser';
 import Image from 'next/image';
+import toast from 'react-hot-toast';
 
 const ContentForm = (props) => {
   const [title, setTitle] = useState('');
   const [tags, setTags] = useState('');
   const [desc, setDesc] = useState('');
+  const [cloudFiles, setCloudFiles] = useState([]);
   const [uploadedFiles, setUploadedFiles] = useState([]);
 
   useEffect(() => {
@@ -16,41 +18,71 @@ const ContentForm = (props) => {
       setTitle(data.title);
       setTags(data.tags);
       setDesc(data.desc);
-      setUploadedFiles(data.files);
+      setCloudFiles(data.files);
     }
   }, []);
 
   const onSubmit = (event) => {
     event.preventDefault();
 
+    // Get rid of the extra stuff FileReader.readAsDataURL gives when encoding to base64
+    const base64Files = uploadedFiles.map((file) => {
+      const base64String = file.base64URL.split(',')[1];
+      return { base64String, fileName: file.fileName, type: file.type };
+    });
+
+    console.log('base64Files', base64Files);
+
     const formValues = {
       title: title,
       tags: tags,
       desc: desc,
-      files: uploadedFiles,
+      files: base64Files,
     };
 
     props.onSubmit(formValues);
   };
 
   const uploadHandler = async (event) => {
-    const files = Array.from(event.target.files).map((file) => {
-      console.log('looking at', file);
-      const reader = new FileReader();
+    // Get all existing file names
+    const fileNames = uploadedFiles
+      .concat(cloudFiles)
+      .map((file) => file.fileName);
 
-      return new Promise((resolve) => {
-        reader.onload = () => {
-          const base64String = reader.result.split(',')[1];
-          const fileName = file.name;
-          const type = file.type;
-          resolve({ base64String, fileName, type });
-        };
+    // Get array of uploaded files from input
+    const files = Array.from(event.target.files)
 
-        reader.readAsDataURL(file);
+      // Filter through each file checking if the file name already exists
+      .filter((file) => {
+        if (fileNames.includes(file.name)) {
+          // Notify user of conflicting file names
+          toast.error(`File name "${file.name}" already exists!`);
+          return false;
+        }
+        return true;
+      })
+
+      // Map through the files with names that do not conflict
+      .map((file) => {
+        const reader = new FileReader();
+
+        // Create a promise that resolves once the file is finished being read
+        return new Promise((resolve) => {
+          reader.onload = () => {
+            const fileName = file.name;
+            const type = file.type;
+            resolve({ base64URL: reader.result, fileName, type });
+          };
+
+          // encode file to base64 for transfer of file over internet
+          reader.readAsDataURL(file);
+        });
       });
-    });
 
-    Promise.all(files).then((result) => setUploadedFiles(result));
+    // wait for all the files to be read then put the results to uploadedFiles
+    Promise.all(files).then((result) =>
+      setUploadedFiles([...uploadedFiles, ...result])
+    );
   };
 
   const deleteFile = (event) => {
@@ -189,7 +221,7 @@ const ContentForm = (props) => {
           />
         </div>
 
-        {uploadedFiles.map((file, index) => (
+        {cloudFiles.map((file, index) => (
           <img key={index} src={file.uri} />
         ))}
 
