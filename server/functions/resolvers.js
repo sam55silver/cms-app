@@ -225,11 +225,14 @@ module.exports = {
   // Delete an existing post of ID
   deletePost: async ({ id }) => {
     try {
+      // delete files
+      await bucket.deleteFiles({ prefix: id + '/' });
+
       // Get and delete post of ID
       await db.doc(id).delete();
       return 'Deleted document';
-    } catch {
-      throw new Error('Error deleting document');
+    } catch (err) {
+      throw new Error(err);
     }
   },
 };
