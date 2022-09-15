@@ -205,15 +205,20 @@ module.exports = {
   // Update an existing post of ID
   updatePost: async ({ id, input }) => {
     try {
-      // If files exist in input, upload them
-      input = await fileUpload(input);
+      // Get and set the post of ID
+      await db.doc(id).set({
+        title: input.title,
+        tags: input.tags,
+        desc: input.desc,
+      });
 
-      // Get and set the post pf ID
-      await db.doc(id).set(input);
+      // If files exist in input, upload them
+      input.files = await fileUpload(input.files, id);
+
       // return post object
       return new Post(id, input);
-    } catch {
-      throw new Error('Error updating document');
+    } catch (err) {
+      throw new Error(err);
     }
   },
 

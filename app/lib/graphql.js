@@ -35,7 +35,9 @@ export const updatePost = /* GraphQL */ `
       title
       tags
       desc
-      files
+      files {
+        uri
+      }
     }
   }
 `;
