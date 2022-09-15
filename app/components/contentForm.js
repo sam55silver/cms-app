@@ -31,8 +31,6 @@ const ContentForm = (props) => {
       return { base64String, fileName: file.fileName, type: file.type };
     });
 
-    console.log('base64Files', base64Files);
-
     const formValues = {
       title: title,
       tags: tags,
