@@ -14,16 +14,31 @@ const resolvers = require(path.join(__dirname, 'resolvers.js'));
 // Init Express with Cors
 const express = require('express');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 
 const app = express();
 app.use(cors({ origin: true }));
+app.use(cookieParser());
+
+app.post('/', (req, res) => {
+  console.log('req', req.secret);
+  return res.send('Logging req');
+});
+
+// Authentication
+// const validateFirebaseIDToken = (req, res, next) => {
+//   console.log('Logging req', req);
+//   res.send();
+//   // next();
+// };
+// app.use(validateFirebaseIDToken);
 
 // Build graphql in express via http
-const { graphqlHTTP } = require('express-graphql');
-app.use(
-  '/graphql',
-  graphqlHTTP({ schema: typeDefs, rootValue: resolvers, graphiql: true })
-);
+// const { graphqlHTTP } = require('express-graphql');
+// app.use(
+//   '/graphql',
+//   graphqlHTTP({ schema: typeDefs, rootValue: resolvers, graphiql: true })
+// );
 
 // export express app to Firebase functions
 const functions = require('firebase-functions');

@@ -13,6 +13,7 @@
     "graphql": "^16.6.0",
     "graphql-request": "^5.0.0",
     "html-react-parser": "^3.0.4",
+    "js-cookie": "^3.0.1",
     "marked": "^4.0.19",
     "next": "12.2.5",
     "react": "18.2.0",
