@@ -10,6 +10,7 @@ const ContentForm = (props) => {
   const [desc, setDesc] = useState('');
   const [cloudFiles, setCloudFiles] = useState([]);
   const [uploadedFiles, setUploadedFiles] = useState([]);
+  console.log('cloudFiles', cloudFiles);
 
   useEffect(() => {
     if (props.postData) {
@@ -92,31 +93,36 @@ const ContentForm = (props) => {
     setUploadedFiles([...newUploadedFiles]);
   };
 
-  const readFiles = () => {
+  const fileHeader = (fileName, index) => {
+    return (
+      <div
+        key={index}
+        className='border-2 border-red-400 rounded-md p-2 w-1/2 flex justify-between items-center'
+      >
+        <span>{fileName}</span>
+        <button
+          id={index}
+          type='button'
+          onClick={deleteFile}
+          className='primary-btn bg-red-500'
+        >
+          Delete
+        </button>
+      </div>
+    );
+  };
+
+  const displayFiles = () => {
     let fileHeaders = [];
     let content = [];
     let renderedImages = [];
 
     uploadedFiles.forEach((file, index) => {
       // Create file headers
-      const header = (
-        <div
-          key={index}
-          className='border-2 border-red-400 rounded-md p-2 w-1/2 flex justify-between items-center'
-        >
-          <span>{file.name}</span>
-          <button
-            id={index}
-            type='button'
-            onClick={deleteFile}
-            className='primary-btn bg-red-500'
-          >
-            Delete
-          </button>
-        </div>
-      );
+      fileHeaders.push(fileHeader(file.fileName, index));
 
-      if (file.type == 'text') {
+      // Split mimetype into the first part, If text, display markdown in html
+      if (file.type.split(',')[0] == 'text') {
         let page = parse(marked.parse(file.content));
 
         page.map((elem, index) => {
@@ -126,9 +132,9 @@ const ContentForm = (props) => {
             let imgSrc = null;
 
             uploadedFiles.forEach((obj) => {
-              if (obj.name == imgFileName) {
-                renderedImages.push(obj.name);
-                imgSrc = obj.content;
+              if (obj.fileName == imgFileName) {
+                renderedImages.push(obj.fileName);
+                imgSrc = obj.uri;
               }
             });
 
@@ -139,9 +145,11 @@ const ContentForm = (props) => {
         });
 
         content.push({ elem: page });
-      } else {
-        const image = <Image src={file.content} width={50} height={50} />;
-        const imageObj = { name: file.name, elem: image };
+      }
+      // If file is an image, create an image
+      else {
+        const image = <img src={file.content} />;
+        const imageObj = { name: file.fileName, elem: image };
         content.push(imageObj);
       }
 
