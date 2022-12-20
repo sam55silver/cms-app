@@ -17,12 +17,18 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 
 const app = express();
-app.use(cors({ origin: true }));
+app.use(cors({ origin: true, credentials: true }));
 app.use(cookieParser());
 
 app.post('/', (req, res) => {
-  console.log('req', req.secret);
-  return res.send('Logging req');
+  console.log('Cookies', req.cookies);
+  return res
+    .cookie('testiing', 'yep!', {
+      secure: true,
+      sameSite: 'none',
+      httpOnly: true,
+    })
+    .send('got msg');
 });
 
 // Authentication

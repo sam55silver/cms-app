@@ -11,8 +11,8 @@ import Cookies from 'js-cookie';
 const fetcher = (query, variables) => client.request(query, variables);
 
 function MyApp({ Component, pageProps }) {
-  const [userUID, setUserUID] = useState(Cookies.get('userUID'));
-  console.log('UID', userUID);
+  // const [userUID, setUserUID] = useState(Cookies.get('userUID'));
+  // console.log('UID', userUID);
 
   return (
     <SWRConfig
@@ -21,7 +21,7 @@ function MyApp({ Component, pageProps }) {
         revalidateOnFocus: false,
       }}
     >
-      {userUID ? (
+      {/* {userUID ? (
         <>
           <Toaster />
           <div className='flex h-screen'>
@@ -30,8 +30,9 @@ function MyApp({ Component, pageProps }) {
           </div>
         </>
       ) : (
-        <LogInForm setUserUID={setUserUID} />
-      )}
+        <LogInForm />
+      )} */}
+      <LogInForm />
     </SWRConfig>
   );
 }

@@ -1,11 +1,9 @@
 import { useState } from 'react';
-import Cookies from 'js-cookie';
+// import Cookies from 'js-cookie';
 
-const LogInForm = (setUserUID) => {
+const LogInForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-
-  Cookies.set('token', 'atoken');
 
   const logIn = (event) => {
     event.preventDefault();
@@ -15,11 +13,12 @@ const LogInForm = (setUserUID) => {
 
     const requestOptions = {
       method: 'POST',
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: email, password: password }),
     };
     fetch(
-      'http://localhost:5001/cms-app-1a47d/us-central1/server',
+      'http://127.0.0.1:5001/cms-app-1a47d/us-central1/server',
       requestOptions
     ).then((response) => console.log('The data from fetch', response));
   };
