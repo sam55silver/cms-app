@@ -1,12 +1,6 @@
-// Firebase init
-const admin = require('firebase-admin');
-const serviceAccount = require('./serviceAccountKey.json');
-admin.initializeApp({
-  projectId: serviceAccount.project_id,
-  credential: admin.credential.cert(serviceAccount),
-});
-
 const stream = require('stream');
+
+const admin = require('firebase-admin');
 
 // Firestore database ref
 const db = admin.firestore().collection('posts');

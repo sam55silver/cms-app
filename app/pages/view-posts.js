@@ -5,6 +5,7 @@ import { getPosts } from '../lib/graphql';
 const ViewPosts = () => {
   const { data, error } = useSWR([getPosts]);
 
+  console.log('error', error);
   if (error) return <span>Error fetching posts</span>;
   if (!data) return <span>Loading...</span>;
 
